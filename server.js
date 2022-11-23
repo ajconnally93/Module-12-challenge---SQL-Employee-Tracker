@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
   port: 3306,
   user: "root",
   password: "root",
-  database: "<PLACEHOLDER_DB>"
+  database: "employeesDB"
 });
 
 
@@ -247,3 +247,8 @@ function removeEmployees() {
       promptDelete(deleteEmployeeChoices);
     });
 }
+
+// BREAKING HERE TO TEST SOME FUNCTIONALITY BEFORE MOVING ON
+// ADDING EMPLOYEE WORKS
+// CONSOLE LOGS APPEAR PROPERLY
+
