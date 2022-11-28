@@ -25,7 +25,7 @@ function starterPrompt() {
     inquirer.prompt({
         type: "list",
         name: "task",
-        message: "Choose from the list what you would like to do",
+        message: "What would you like to do?",
         choices: [
           "View Employees",
           "View Employees by Department",
@@ -86,7 +86,10 @@ function viewEmployee() {
   
     connection.query(query, function (err, res) {
       if (err) console.error("viewEmployee function error");
+
+      // will show backend information - not relevant to user, but leaving in here
       console.table(res);
+
       console.log("Employees viewed\n");
       starterPrompt();
     });
@@ -153,7 +156,7 @@ function promptDepartment(departmentChoices) {
         connection.query(query, answer.departmentId, function (err, res) {
           if (err) console.error("promptDepartment function error");
   
-          console.table("response ", res);
+          console.table(res);
           console.log(res.affectedRows + "Employees viewed\n");
   
           starterPrompt();
@@ -244,7 +247,7 @@ function removeEmployees() {
       }));
   
       console.table(res);
-      console.log("array to delete\n");
+      console.log("Employee removed.\n");
   
       promptDelete(deleteEmployees);
     });
@@ -297,7 +300,7 @@ function employeeArray() {
     }));
     
     console.table(res);
-    console.log("employeeArray updated\n")
+    console.log("Employee updated\n")
     roleArray(employeeChoices);
   });
 }
@@ -322,7 +325,7 @@ function roleArray(employeeChoices) {
     }));
 
     console.table(res);
-    console.log("roleArray updated\n")
+    console.log("Role updated\n")
     promptEmployeeRole(employeeChoices, roleChoices);
   });
 }
@@ -383,7 +386,7 @@ function addRole() {
     }));
 
     console.table(res);
-    console.log("Department array");
+    console.log("Role added");
 
     promptAddRole(departmentChoices);
   });
