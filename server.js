@@ -42,10 +42,6 @@ function starterPrompt() {
           case "View Employees":
             viewEmployee();
             break;
-
-          case "View Employee by Department":
-            viewEmployeeByDepartment();
-            break;
           
           case "Add Employee":
             addEmployee();
