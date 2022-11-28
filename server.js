@@ -15,12 +15,12 @@ var connection = mysql.createConnection({
 
 // connects to sql server + database
 connection.connect(function (err) {
-    if (err) throw err;
-    // first prompt ran by inquirer for the user to choose what they want to do
+    if (err) console.error("Could not connect to Database");
     starterPrompt();
   });
 
   // function which prompts the user for what action they should take
+  // ALL FUNCTIONS ADDED AFTER THIS WILL BE CALLED BASE ON THE USER'S CHOICE. This is the HEART of the application
 function starterPrompt() {
     inquirer.prompt({
         type: "list",
@@ -36,13 +36,14 @@ function starterPrompt() {
           "End"]
       })
 
+// ALL FUNCTIONS ADDED AFTER THIS WILL BE CALLED BASE ON THE USER'S CHOICE. This is the HEART of the application
       .then(function ({ task }) {
         switch (task) {
           case "View Employees":
             viewEmployee();
             break;
 
-          case "View Employees by Department":
+          case "View Employee by Department":
             viewEmployeeByDepartment();
             break;
           
@@ -84,7 +85,7 @@ function viewEmployee() {
       ON m.id = e.manager_id`
   
     connection.query(query, function (err, res) {
-      if (err) throw err;
+      if (err) console.error("viewEmployee function error");
       console.table(res);
       console.log("Employees viewed\n");
       starterPrompt();
@@ -106,7 +107,7 @@ function viewEmployeeByDepartment() {
     GROUP BY d.id, d.name`
   
     connection.query(query, function (err, res) {
-      if (err) throw err;
+      if (err) console.error("viewEmployeeByDepartment function error");
   
     //   creates MAP array of department choices, filled in by the (data)
       const departmentChoices = res.map(data => ({
@@ -123,7 +124,7 @@ function viewEmployeeByDepartment() {
 }
 
 
-// Employees will show when department is chosen
+// will show departments and is called in viewEmployeesByDepartment() function
 function promptDepartment(departmentChoices) {
 
     // console.log("TEST LOG promptDepartment")
@@ -136,6 +137,7 @@ function promptDepartment(departmentChoices) {
           choices: departmentChoices
         }
       ])
+      // instance of where I maybe could test out the use of -this- in reference to main object
       .then(function (answer) {
         console.log("answer ", answer.departmentId);
   
@@ -149,7 +151,7 @@ function promptDepartment(departmentChoices) {
     WHERE d.id = ?`
   
         connection.query(query, answer.departmentId, function (err, res) {
-          if (err) throw err;
+          if (err) console.error("promptDepartment function error");
   
           console.table("response ", res);
           console.log(res.affectedRows + "Employees viewed\n");
@@ -168,7 +170,7 @@ function addEmployee() {
         FROM role r`
   
     connection.query(query, function (err, res) {
-      if (err) throw err;
+      if (err) console.error("addEmployee function error");
   
     //   be careful with backticks, can lead to SQL injection
       const roleChoices = res.map(({ id, title, salary }) => ({
@@ -182,7 +184,7 @@ function addEmployee() {
     });
 }
 
-
+// data returned from this function gets passed through addEmployee function
 function promptInsert(roleChoices) {
     inquirer.prompt([
         {
@@ -215,7 +217,7 @@ function promptInsert(roleChoices) {
             manager_id: answer.managerId,
           },
           function (err, res) {
-            if (err) throw err;
+            if (err) console.error("promptInsert function error");
   
             console.table(res);
             console.log(res.insertedRows + "Inserted successfully\n");
@@ -234,7 +236,7 @@ function removeEmployees() {
         FROM employee e`
   
     connection.query(query, function (err, res) {
-      if (err) throw err;
+      if (err) console.error("removeEmployees function error");
 
     //  again be careful of SQL injection when using backticks. might be able to use .env file? may look into for future projects
       const deleteEmployees = res.map(({ id, first_name, last_name }) => ({
@@ -252,6 +254,8 @@ function removeEmployees() {
 // ADDING EMPLOYEE WORKS
 // CONSOLE LOGS APPEAR PROPERLY
 
+
+// will ask User which employee to delete when called inside of removeEmployees() function
 function promptDelete(deleteEmployees) {
   inquirer.prompt([
       {
@@ -324,6 +328,7 @@ function roleArray(employeeChoices) {
 }
 
 
+// will prompt Employee Role to be updated/set when called in roleArray function
 function promptEmployeeRole(employeeChoices, roleChoices) {
   inquirer.prompt([
       {
@@ -359,3 +364,69 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
 
 // BREAKING CODE UP HERE AGAIN TO TEST NEW FUNCTIONS
 // ALL WORKING AS INTENDED
+
+function addRole() {
+  var query =
+    `SELECT d.id, d.name, r.salary AS budget
+    FROM employee e
+    JOIN role r
+    ON e.role_id = r.id
+    JOIN department d
+    ON d.id = r.department_id
+    GROUP BY d.id, d.name`
+
+  connection.query(query, function (err, res) {
+    if (err) console.error("addRole function error");
+
+    const departmentChoices = res.map(({ id, name }) => ({
+      value: id, name: `${id} ${name}`
+    }));
+
+    console.table(res);
+    console.log("Department array");
+
+    promptAddRole(departmentChoices);
+  });
+}
+
+
+// will prompt user to add role when called inside the addRole() function
+function promptAddRole(departmentChoices) {
+  inquirer.prompt([
+      {
+        type: "input",
+        name: "roleTitle",
+        message: "Role title: "
+      },
+      {
+        type: "input",
+        name: "roleSalary",
+        message: "Role salary: "
+      },
+      {
+        type: "list",
+        name: "departmentId",
+        message: "Department: ",
+        choices: departmentChoices
+      },
+    ])
+
+    // may test with this.title and this.salary and this.departmentId, because -this- refers to the object
+    .then(function (answer) {
+      var query = `INSERT INTO role SET ?`
+
+      connection.query(query, {
+        title: answer.title,
+        salary: answer.salary,
+        department_id: answer.departmentId
+      },
+        function (err, res) {
+          if (err) console.error("promptAddRole function error");
+
+          console.table(res);
+          console.log("Role Inserted");
+
+          starterPrompt();
+        });
+    });
+}
