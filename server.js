@@ -72,7 +72,7 @@ function starterPrompt() {
 
 function viewEmployee() {
 
-    console.log("TEST log for viewEmployee function\n");
+    console.log("List of Employees\n");
   
     var query =
       `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
@@ -98,7 +98,7 @@ function viewEmployee() {
 
 function viewEmployeeByDepartment() {
 
-    console.log("TEST log for viewEmployeeByDepartment function\n");
+    console.log("Employees by department\n");
   
     var query =
       `SELECT d.id, d.name, r.salary AS budget
@@ -166,7 +166,7 @@ function promptDepartment(departmentChoices) {
 
 
 function addEmployee() {
-    console.log("TEST LOG for addEmployee function")
+    console.log("Add employee\n")
   
     var query =
       `SELECT r.id, r.title, r.salary 
@@ -232,7 +232,7 @@ function promptInsert(roleChoices) {
 
 
 function removeEmployees() {
-    console.log("TEST LOG for removeEmployees function");
+    console.log("Remove employee");
   
     var query =
       `SELECT e.id, e.first_name, e.last_name
@@ -282,7 +282,7 @@ function promptDelete(deleteEmployees) {
 
 
 function employeeArray() {
-  console.log("Updating employee:");
+  console.log("Updating employee");
   var query =
     `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
   FROM employee e
@@ -311,7 +311,7 @@ function updateEmployeeRole() {
 
 
 function roleArray(employeeChoices) {
-  console.log("TEST LOG for roleArray function");
+  console.log("Update employee role");
   var query =
     `SELECT r.id, r.title, r.salary 
   FROM role r`
