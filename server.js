@@ -237,14 +237,14 @@ function removeEmployees() {
       if (err) throw err;
 
     //  again be careful of SQL injection when using backticks. might be able to use .env file? may look into for future projects
-      const deleteEmployeeChoices = res.map(({ id, first_name, last_name }) => ({
+      const deleteEmployees = res.map(({ id, first_name, last_name }) => ({
         value: id, name: `${id} ${first_name} ${last_name}`
       }));
   
       console.table(res);
       console.log("array to delete\n");
   
-      promptDelete(deleteEmployeeChoices);
+      promptDelete(deleteEmployees);
     });
 }
 
@@ -252,3 +252,110 @@ function removeEmployees() {
 // ADDING EMPLOYEE WORKS
 // CONSOLE LOGS APPEAR PROPERLY
 
+function promptDelete(deleteEmployees) {
+  inquirer.prompt([
+      {
+        type: "list",
+        name: "employeeId",
+        message: "Which employee would you like to remove?",
+        choices: deleteEmployees
+      }
+    ])
+
+    .then(function (answer) {
+      var query = `DELETE FROM employee WHERE ?`;
+      connection.query(query, { id: answer.employeeId }, function (err, res) {
+        if (err) console.error("Error Deleting Employee");
+        console.table(res);
+        console.log(res.affectedRows + "Deleted\n");
+        starterPrompt();
+      });
+    });
+}
+
+
+function employeeArray() {
+  console.log("Updating employee:");
+  var query =
+    `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
+  FROM employee e
+  JOIN role r
+	ON e.role_id = r.id
+  JOIN department d
+  ON d.id = r.department_id
+  JOIN employee m
+	ON m.id = e.manager_id`
+
+  connection.query(query, function (err, res) {
+    if (err) console.error("Error updating employee role");
+    const employeeChoices = res.map(({ id, first_name, last_name }) => ({
+      value: id, name: `${first_name} ${last_name}`      
+    }));
+    
+    console.table(res);
+    console.log("employeeArray updated\n")
+    roleArray(employeeChoices);
+  });
+}
+
+function updateEmployeeRole() { 
+  employeeArray();
+}
+
+
+function roleArray(employeeChoices) {
+  console.log("TEST LOG for roleArray function");
+  var query =
+    `SELECT r.id, r.title, r.salary 
+  FROM role r`
+
+  let roleChoices;
+
+  connection.query(query, function (err, res) {
+    if (err) console.error("roleArray error");
+    roleChoices = res.map(({ id, title, salary }) => ({
+      value: id, title: `${title}`, salary: `${salary}`      
+    }));
+
+    console.table(res);
+    console.log("roleArray updated\n")
+    promptEmployeeRole(employeeChoices, roleChoices);
+  });
+}
+
+
+function promptEmployeeRole(employeeChoices, roleChoices) {
+  inquirer.prompt([
+      {
+        type: "list",
+        name: "employeeId",
+        message: "Which employee do you want to set with this role?",
+        choices: employeeChoices
+      },
+      {
+        type: "list",
+        name: "roleId",
+        message: "Which role would you like to update?",
+        choices: roleChoices
+      },
+    ])
+    .then(function (answer) {
+      var query = `UPDATE employee SET role_id = ? WHERE id = ?`
+      // when finished prompting insert a new item into employeesDB
+      connection.query(query,
+        [ answer.roleId,  
+          answer.employeeId
+        ],
+        function (err, res) {
+          if (err) console.error("promptEmployeeRole function error");
+
+          console.table(res);
+          console.log(res.affectedRows + "Updated");
+
+          starterPrompt();
+        });
+    });
+}
+
+// BREAKING CODE UP HERE AGAIN TO TEST NEW FUNCTIONS
+// ALL WORKING AS INTENDED
