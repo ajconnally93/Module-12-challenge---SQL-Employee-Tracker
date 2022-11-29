@@ -47,6 +47,7 @@ function starterPrompt() {
             addEmployee();
             break;
 
+          // Satisfies 1 of the bonuses, could probably add cases & functions to remove departments/roles with a bit more time
           case "Remove Employees":
             removeEmployees();
             break;
